@@ -1,0 +1,705 @@
+/* =========================================================
+   GYM METRICS — Estilos
+   Mobile first: pensado para el celular, centrado en pantallas grandes.
+   Tema único: negro con detalles dorados.
+   ========================================================= */
+
+/* ---------- Variables ---------- */
+:root {
+  --fondo: #0d0d0d;
+  --superficie: #1a1a1a;
+  --superficie-alta: #242424;
+  --texto: #f2f2f2;
+  --texto-suave: #9a9a9a;
+  --borde: #2c2c2c;
+  --dorado: #d4af37;
+  --dorado-claro: #e8c860;
+  --dorado-suave: rgba(212, 175, 55, 0.12);
+  --peligro: #ef5350;
+  --radio: 14px;
+  --alto-menu: 64px;
+
+  color-scheme: dark; /* inputs, scrollbars y selects del navegador en modo oscuro */
+}
+
+/* ---------- Base ---------- */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+[hidden] { display: none !important; }
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--fondo);
+  color: var(--texto);
+  line-height: 1.4;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button { font: inherit; cursor: pointer; }
+button:disabled { cursor: default; opacity: 0.4; }
+
+:focus-visible {
+  outline: 2px solid var(--dorado);
+  outline-offset: 2px;
+}
+
+/* ---------- Pantallas: solo se ve la que tiene .activa ---------- */
+.pantalla {
+  display: none;
+  max-width: 480px;
+  min-height: 100vh;
+  margin: 0 auto;
+  /* abajo dejamos lugar para el menú fijo (y la barra de gestos del celular) */
+  padding: 16px 16px calc(var(--alto-menu) + 32px + env(safe-area-inset-bottom));
+}
+.pantalla.activa { display: block; }
+
+/* ---------- Encabezado de cada pestaña ---------- */
+.encabezado { padding: 8px 0 20px; }
+.encabezado__fila { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 40px; }
+.encabezado__acciones { display: flex; align-items: center; gap: 8px; }
+.encabezado__fecha { color: var(--texto-suave); font-size: 0.9rem; }
+.encabezado__fecha::first-letter { text-transform: uppercase; }
+.encabezado h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+/* rayita dorada debajo del título */
+.encabezado h1::after {
+  content: "";
+  display: block;
+  width: 36px;
+  height: 3px;
+  margin-top: 6px;
+  border-radius: 2px;
+  background: var(--dorado);
+}
+
+/* Barra con flecha de volver (Ajustes y pantallas internas) */
+.barra-superior { display: flex; align-items: center; gap: 12px; padding: 8px 0 20px; }
+.barra-superior h2 { font-size: 1.4rem; }
+
+/* Botón redondo con un ícono (⚙, ←) */
+.boton-icono {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--borde);
+  border-radius: 50%;
+  background: var(--superficie);
+  color: var(--texto);
+  font-size: 1.1rem;
+}
+
+.chip {
+  border: 1px solid var(--dorado);
+  background: transparent;
+  color: var(--dorado);
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+/* ---------- Tarjetas ---------- */
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+}
+.tarjeta__titulo { font-weight: 700; }
+.tarjeta--vacia { text-align: center; padding: 32px 20px; }
+.tarjeta--vacia .boton-principal { align-self: center; padding: 12px 24px; margin-top: 4px; }
+
+.ayuda { font-size: 0.85rem; color: var(--texto-suave); }
+
+/* ---------- Botones ---------- */
+.boton-principal {
+  padding: 14px;
+  border: none;
+  border-radius: var(--radio);
+  background: var(--dorado);
+  color: #111;
+  font-weight: 700;
+}
+.boton-principal:active:not(:disabled) { background: var(--dorado-claro); }
+
+.boton-secundario {
+  padding: 13px;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--superficie-alta);
+  color: var(--texto);
+  font-weight: 600;
+}
+
+/* ---------- Ajustes ---------- */
+.resumen-datos { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.resumen-datos li {
+  padding: 12px;
+  text-align: center;
+  background: var(--fondo);
+  border-radius: 10px;
+}
+.resumen-datos strong { display: block; font-size: 1.6rem; color: var(--dorado); }
+.resumen-datos span { font-size: 0.8rem; color: var(--texto-suave); }
+
+/* =========================================================
+   MENÚ INFERIOR
+   ========================================================= */
+.menu-inferior {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  justify-content: center;
+  background: var(--fondo);
+  border-top: 1px solid var(--borde);
+  padding-bottom: env(safe-area-inset-bottom); /* no tapar con la barra de gestos */
+}
+.menu-inferior__boton {
+  flex: 1;
+  max-width: 120px;
+  height: var(--alto-menu);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: none;
+  background: none;
+  color: var(--texto-suave);
+  font-size: 0.72rem;
+}
+.menu-inferior__boton svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor; /* el ícono toma el color del texto del botón */
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.menu-inferior__boton.activo { color: var(--dorado); font-weight: 600; }
+
+/* =========================================================
+   ETAPA 2: EJERCICIOS
+   ========================================================= */
+
+/* ---------- Campos de formulario ---------- */
+input[type="text"],
+input[type="search"],
+input[type="number"],
+select {
+  width: 100%;
+  padding: 11px 12px;
+  font: inherit;
+  color: var(--texto);
+  background: var(--fondo);
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+}
+input:focus { border-color: var(--dorado); outline: none; }
+
+.campo { display: flex; flex-direction: column; gap: 6px; font-size: 0.9rem; color: var(--texto-suave); border: none; }
+.campo legend { margin-bottom: 6px; }
+
+.buscador { margin-bottom: 12px; background: var(--superficie) !important; }
+
+/* ---------- Chips de filtro (scroll horizontal si no entran) ---------- */
+.filtros {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin: 0 -16px 8px;   /* que lleguen hasta el borde de la pantalla al deslizar */
+  padding: 0 16px 12px;
+  scrollbar-width: none;
+}
+.filtros::-webkit-scrollbar { display: none; }
+.chip--filtro { border-color: var(--borde); color: var(--texto); }
+.chip--filtro.activo { background: var(--dorado); border-color: var(--dorado); color: #111; font-weight: 600; }
+.chip__cantidad { opacity: 0.6; margin-left: 2px; }
+
+/* ---------- Lista de ejercicios ---------- */
+.grupo { margin-bottom: 16px; }
+.grupo__titulo {
+  margin: 4px 0 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dorado);
+}
+.lista { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  text-align: left;
+  color: var(--texto);
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+}
+.item:active { background: var(--superficie-alta); }
+.item__nombre { font-weight: 600; }
+.etiqueta {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  color: var(--texto-suave);
+  border: 1px solid var(--borde);
+}
+.etiqueta--cardio { color: var(--dorado); border-color: rgba(212, 175, 55, 0.4); }
+
+.vacio { text-align: center; color: var(--texto-suave); padding: 32px 0; }
+
+/* ---------- Botón flotante "+" (alineado a la columna en pantallas anchas) ---------- */
+.boton-flotante {
+  position: fixed;
+  right: max(16px, calc(50% - 224px));
+  bottom: calc(var(--alto-menu) + 16px + env(safe-area-inset-bottom));
+  z-index: 6;
+  width: 58px;
+  height: 58px;
+  border: none;
+  border-radius: 50%;
+  background: var(--dorado);
+  color: #111;
+  font-size: 2rem;
+  line-height: 1;
+  box-shadow: 0 6px 18px rgba(212, 175, 55, 0.3);
+}
+
+/* ---------- Hoja que sube desde abajo (<dialog>) ---------- */
+.hoja {
+  width: 100%;
+  max-width: 480px;
+  max-height: 92vh;
+  margin: auto auto 0;   /* pegada abajo y centrada */
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--texto);
+}
+.hoja::backdrop { background: rgba(0, 0, 0, 0.65); }  /* el fondo oscurecido */
+.hoja[open] { animation: subir 0.2s ease-out; }
+@keyframes subir { from { transform: translateY(40px); opacity: 0; } }
+
+.hoja__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+  background: var(--superficie);
+  border-top: 2px solid var(--dorado);
+  border-radius: 20px 20px 0 0;
+}
+.hoja__titulo { font-weight: 700; font-size: 1.1rem; text-align: center; }
+
+/* Radios escondidos: se ve solo el <span> que está al lado */
+.opciones-musculo input,
+.segmentado input { position: absolute; opacity: 0; pointer-events: none; }
+
+.opciones-musculo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.opciones-musculo label { position: relative; }
+.opciones-musculo span {
+  display: block;
+  padding: 9px 4px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--texto);
+  background: var(--fondo);
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  cursor: pointer;
+}
+/* "+" = el elemento que está justo después: el span pegado al radio marcado */
+.opciones-musculo input:checked + span { border-color: var(--dorado); color: var(--dorado); background: var(--dorado-suave); font-weight: 600; }
+.opciones-musculo input:focus-visible + span { outline: 2px solid var(--dorado); }
+
+.segmentado { display: flex; gap: 4px; padding: 4px; background: var(--fondo); border-radius: 10px; }
+.segmentado label { position: relative; flex: 1; }
+.segmentado span {
+  display: block;
+  padding: 8px 4px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--texto);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.segmentado input:checked + span { background: var(--superficie-alta); color: var(--dorado); font-weight: 600; }
+.segmentado input:disabled + span { opacity: 0.4; cursor: default; }
+.segmentado input:focus-visible + span { outline: 2px solid var(--dorado); }
+
+.error-form { color: var(--peligro); font-size: 0.9rem; font-weight: 600; }
+
+.boton-peligro {
+  padding: 13px;
+  border: 1px solid rgba(239, 83, 80, 0.4);
+  border-radius: var(--radio);
+  background: transparent;
+  color: var(--peligro);
+  font-weight: 600;
+}
+
+/* =========================================================
+   ETAPA 3: ENTRENAR
+   ========================================================= */
+
+/* ---------- Pantalla Entrenar ---------- */
+.sesion__cabecera { margin-bottom: 14px; }
+.sesion__fecha { font-size: 0.85rem; color: var(--texto-suave); }
+.sesion__fecha::first-letter { text-transform: uppercase; }
+.sesion__musculos { font-size: 1.25rem; font-weight: 700; color: var(--dorado); }
+
+.sesion__acciones { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+
+/* Ejercicio cargado en la sesión: nombre arriba, series abajo */
+.item--registro { flex-direction: column; align-items: flex-start; gap: 4px; }
+.item__detalle { font-size: 0.85rem; color: var(--texto-suave); font-variant-numeric: tabular-nums; }
+
+/* Círculo de "hecho" encima del borde derecho de la tarjeta */
+.registro { position: relative; }
+.registro .item { padding-right: 68px; }  /* lugar para el círculo */
+.check {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);  /* centrado vertical */
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--texto-suave);
+  border-radius: 50%;
+  background: transparent;
+}
+.check svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: #111;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;  /* la tilde no se ve hasta marcarlo */
+}
+.registro.hecho .check { background: var(--dorado); border-color: var(--dorado); }
+.registro.hecho .check svg { opacity: 1; }
+.check { transition: background 0.15s, border-color 0.15s; }
+/* La tarjeta hecha queda más apagada, así resaltan las que faltan */
+.registro.hecho .item { opacity: 0.55; }
+
+.boton-texto {
+  padding: 10px;
+  border: none;
+  background: none;
+  color: var(--texto-suave);
+  font-weight: 600;
+}
+.boton-texto--dorado { color: var(--dorado); padding: 6px 0; text-align: left; }
+
+/* Tarjeta "Última sesión" */
+.resumen-ultima__titulo { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--texto-suave); }
+.resumen-ultima__musculos { font-weight: 700; color: var(--dorado); }
+
+/* Checkboxes de músculos (mismo aspecto que los radios del formulario de ejercicios) */
+.opciones-musculo input[type="checkbox"] { position: absolute; opacity: 0; pointer-events: none; }
+
+input[type="date"] {
+  width: 100%;
+  padding: 10px 12px;
+  font: inherit;
+  color: var(--texto);
+  background: var(--fondo);
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+}
+
+/* ---------- Hojas altas (elegir ejercicio, series) ---------- */
+.hoja--alta .hoja__panel { height: 88vh; }
+.hoja__panel { max-height: 92vh; }
+.hoja__fila { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.hoja__titulo--izq { text-align: left; }
+/* La parte del medio scrollea; título y botones quedan fijos */
+.hoja__scroll { flex: 1; min-height: 0; overflow-y: auto; margin: 0 -16px; padding: 0 16px; }
+.hoja .filtros { margin-bottom: 0; }
+
+.item__marca { color: var(--dorado); font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+
+/* ---------- La última vez ---------- */
+.ultima-vez {
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  border-radius: 12px;
+  background: var(--dorado-suave);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+.ultima-vez__titulo { font-size: 0.8rem; color: var(--dorado); font-weight: 600; }
+.ultima-vez__titulo::first-letter { text-transform: uppercase; }
+.ultima-vez__detalle { font-weight: 600; font-variant-numeric: tabular-nums; margin-top: 2px; }
+
+/* ---------- Editor de series ---------- */
+.series__cabecera,
+.serie {
+  display: grid;
+  /* columnas: número | reps | kg | borrar */
+  grid-template-columns: 22px 1fr 1fr 36px;
+  align-items: center;
+  gap: 8px;
+}
+.series--sin-peso .series__cabecera,
+.series--sin-peso .serie { grid-template-columns: 22px 1fr 36px; }
+
+.series__cabecera { font-size: 0.75rem; color: var(--texto-suave); padding: 0 0 6px; }
+.series__cabecera span:not(:first-child) { text-align: center; }
+.serie { padding: 6px 0; border-top: 1px solid var(--borde); }
+.serie__numero { font-weight: 700; color: var(--texto-suave); text-align: center; }
+
+/* [−] número [+] */
+.contador { display: flex; align-items: center; gap: 4px; }
+.contador button {
+  flex-shrink: 0;
+  width: 36px;
+  height: 40px;
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  background: var(--superficie-alta);
+  color: var(--texto);
+  font-size: 1.2rem;
+  line-height: 1;
+}
+.contador button:active { border-color: var(--dorado); color: var(--dorado); }
+.contador input {
+  min-width: 0;
+  padding: 9px 2px;
+  text-align: center;
+  font-size: 1.05rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.serie__borrar {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--texto-suave);
+  font-size: 1rem;
+}
+.series__agregar { width: 100%; margin-top: 8px; }
+
+/* Cardio: un solo contador grande */
+.cardio { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 0; }
+.cardio .contador { width: 220px; }
+.cardio .contador input { font-size: 1.6rem; }
+
+/* =========================================================
+   ETAPA 4: HISTORIAL
+   ========================================================= */
+.boton--ancho { width: 100%; margin-bottom: 18px; }
+
+.mes { margin-bottom: 20px; }
+.mes__titulo {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dorado);
+}
+.mes__titulo span { color: var(--texto-suave); font-weight: 600; letter-spacing: 0; text-transform: none; }
+
+/* Tarjeta de una sesión: fecha a la izquierda en un bloquecito, datos a la derecha */
+.item--sesion { justify-content: flex-start; gap: 14px; }
+.dia-bloque {
+  flex-shrink: 0;
+  width: 48px;
+  padding: 6px 0;
+  text-align: center;
+  border-radius: 10px;
+  background: var(--fondo);
+  border: 1px solid var(--borde);
+}
+.dia-bloque__numero { display: block; font-size: 1.3rem; font-weight: 800; line-height: 1.1; }
+.dia-bloque__semana { display: block; font-size: 0.7rem; color: var(--texto-suave); text-transform: uppercase; }
+.item__textos { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.item__musculos { font-weight: 700; color: var(--dorado); }
+
+/* ---------- Detalle ---------- */
+.barra-superior h2::first-letter { text-transform: uppercase; }
+.campo--fila { flex-direction: row; align-items: center; gap: 12px; margin: 14px 0 18px; }
+.campo--fila input { flex: 1; }
+
+.detalle-ejercicio { flex-direction: column; align-items: stretch; gap: 8px; }
+.detalle-ejercicio__cabecera { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.detalle-ejercicio__editar { font-size: 0.8rem; color: var(--dorado); flex-shrink: 0; }
+.detalle-series { list-style: none; display: flex; flex-direction: column; gap: 2px; }
+.detalle-series li {
+  display: flex;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+  font-variant-numeric: tabular-nums;
+}
+.detalle-series li b { color: var(--texto); font-weight: 600; }
+.detalle-series__n { width: 56px; flex-shrink: 0; }
+
+/* =========================================================
+   ETAPA 5: PROGRESO
+   ========================================================= */
+
+/* Texto que solo leen los lectores de pantalla */
+.visualmente-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- Pestañas Ejercicio / Asistencia / Músculos ---------- */
+.pestanas {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 16px;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+}
+.pestanas button {
+  flex: 1;
+  padding: 9px 4px;
+  border: none;
+  border-radius: 9px;
+  background: none;
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.pestanas button[aria-selected="true"] { background: var(--dorado); color: #111; }
+
+/* ---------- Selector de ejercicio ---------- */
+.selector-ejercicio { display: block; margin-bottom: 12px; }
+.selector-ejercicio select {
+  padding: 13px 12px;
+  font-weight: 700;
+  background: var(--superficie);
+  border-color: var(--dorado);
+}
+
+/* ---------- Cifras grandes (tarjetitas) ---------- */
+.cifras { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.cifras--tres { grid-template-columns: repeat(3, 1fr); }
+.cifra {
+  padding: 12px;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+}
+.cifra__titulo { font-size: 0.75rem; color: var(--texto-suave); }
+.cifra__valor { font-size: 1.5rem; font-weight: 800; color: var(--dorado); font-variant-numeric: tabular-nums; }
+.cifra__valor small { font-size: 0.85rem; font-weight: 600; }
+.cifra__detalle { font-size: 0.75rem; color: var(--texto-suave); }
+.cifras--tres .cifra { text-align: center; padding: 12px 6px; }
+
+/* ---------- Gráficos SVG ---------- */
+.grafico { display: block; width: 100%; height: auto; overflow: visible; }
+.grafico__grilla { stroke: var(--borde); stroke-width: 1; }
+.grafico__texto { fill: var(--texto-suave); font-size: 10px; font-family: inherit; }
+.grafico__linea { fill: none; stroke: var(--dorado); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.grafico__punto { fill: var(--superficie); stroke: var(--dorado); stroke-width: 2; }
+.grafico__punto--ultimo { fill: var(--dorado); }
+.grafico__valor { fill: var(--texto); font-size: 11px; font-weight: 700; font-family: inherit; }
+.grafico__barra { fill: rgba(212, 175, 55, 0.55); }
+.grafico__barra--actual { fill: var(--dorado); }
+
+/* ---------- Lista de veces que hiciste el ejercicio ---------- */
+.vez { cursor: pointer; }
+.vez__fecha { flex-shrink: 0; width: 44px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.vez__detalle { flex: 1; min-width: 0; font-size: 0.85rem; color: var(--texto-suave); font-variant-numeric: tabular-nums; }
+.vez__cambio { flex-shrink: 0; font-size: 0.8rem; font-weight: 700; min-width: 40px; text-align: right; }
+.vez__cambio--sube { color: #4caf50; }
+.vez__cambio--baja { color: var(--peligro); }
+.vez__cambio--igual { color: var(--texto-suave); }
+.item.vez { justify-content: flex-start; }
+
+/* ---------- Calendario ---------- */
+.calendario__cabecera { display: flex; align-items: center; justify-content: space-between; }
+.calendario__cabecera .boton-icono:disabled { opacity: 0.3; }
+.calendario__titulo { font-weight: 700; }
+.calendario__titulo::first-letter { text-transform: uppercase; }
+.calendario__semana,
+.calendario__grilla { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.calendario__semana span { text-align: center; font-size: 0.75rem; font-weight: 600; color: var(--texto-suave); }
+.dia-cal {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  background: var(--fondo);
+  color: var(--texto-suave);
+  font-size: 0.85rem;
+}
+.dia-cal--entreno { background: var(--dorado); color: #111; font-weight: 800; }
+.dia-cal--hoy { border-color: var(--dorado); color: var(--texto); }
+.dia-cal--futuro { opacity: 0.35; }
+.dia-cal:disabled { cursor: default; opacity: 1; }
+.dia-cal--futuro:disabled { opacity: 0.35; }
+
+/* ---------- Barras por músculo ---------- */
+.barras-musculo { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.barra-musculo {
+  padding: 12px 14px;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+}
+.barra-musculo__fila { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.barra-musculo__nombre { font-weight: 700; }
+.barra-musculo__cifra { font-weight: 700; color: var(--dorado); font-variant-numeric: tabular-nums; }
+.barra-musculo__detalle { font-size: 0.8rem; color: var(--texto-suave); }
+.barra-musculo__pista { height: 8px; margin: 8px 0 4px; border-radius: 999px; background: var(--fondo); overflow: hidden; }
+.barra-musculo__relleno { height: 100%; border-radius: 999px; background: var(--dorado); transition: width 0.3s; }
+.barra-musculo--cero { opacity: 0.45; }
+.barra-musculo--cero .barra-musculo__cifra { color: var(--texto-suave); }
+
+/* ---------- Aviso flotante ---------- */
+.aviso {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--alto-menu) + 20px + env(safe-area-inset-bottom));
+  z-index: 20;
+  max-width: 90%;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: var(--dorado);
+  color: #111;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 20px);
+  transition: opacity 0.25s, transform 0.25s;
+}
+.aviso.visible { opacity: 1; transform: translate(-50%, 0); }

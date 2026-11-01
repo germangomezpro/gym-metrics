@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <!-- viewport-fit=cover: usa toda la pantalla, también debajo de la "muesca" del celular -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0d0d0d">
+  <meta name="description" content="Registro y seguimiento de entrenamientos en el gimnasio">
+  <title>Gym Metrics</title>
+
+  <!-- PWA: datos para instalarla como app -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="iconos/favicon.png">
+
+  <!-- iPhone: Safari no lee todo del manifest, necesita estas etiquetas -->
+  <link rel="apple-touch-icon" href="iconos/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Gym Metrics">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+
+  <!-- ======================================================
+       PESTAÑA 1: ENTRENAR
+       ====================================================== -->
+  <section id="pantalla-entrenar" class="pantalla activa">
+    <header class="encabezado">
+      <div class="encabezado__fila">
+        <p class="encabezado__fecha" id="fecha-hoy"></p>
+        <div class="encabezado__acciones">
+          <!-- Aparece solo si el navegador permite instalar la app -->
+          <button class="chip" id="btn-instalar" hidden>Instalar app</button>
+          <button class="boton-icono" data-ir="ajustes" aria-label="Ajustes">⚙</button>
+        </div>
+      </div>
+      <h1>Entrenar</h1>
+    </header>
+
+    <!-- ESTADO 1: no hay entrenamiento en curso -->
+    <div id="entrenar-inicio">
+      <div class="tarjeta tarjeta--vacia">
+        <p class="tarjeta__titulo">¿Qué entrenás hoy?</p>
+        <button class="boton-principal" id="btn-empezar">Empezar entrenamiento</button>
+      </div>
+      <!-- Resumen de la última sesión (lo completa JS) -->
+      <div id="resumen-ultima"></div>
+    </div>
+
+    <!-- ESTADO 2: entrenamiento en curso -->
+    <div id="entrenar-sesion" hidden>
+      <div class="sesion__cabecera">
+        <p class="sesion__fecha" id="sesion-fecha"></p>
+        <p class="sesion__musculos" id="sesion-musculos"></p>
+      </div>
+
+      <ul class="lista" id="sesion-ejercicios"></ul>
+
+      <div class="sesion__acciones">
+        <button class="boton-principal" id="btn-agregar-ejercicio">+ Agregar ejercicio</button>
+        <button class="boton-secundario" id="btn-terminar">Terminar sesión</button>
+        <button class="boton-texto" id="btn-descartar">Descartar sesión</button>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ======================================================
+       HOJA: EMPEZAR ENTRENAMIENTO (músculos + fecha)
+       ====================================================== -->
+  <dialog class="hoja" id="dialogo-empezar" aria-labelledby="titulo-empezar">
+    <form class="hoja__panel" id="form-empezar" novalidate>
+      <p class="hoja__titulo" id="titulo-empezar">Empezar entrenamiento</p>
+
+      <fieldset class="campo">
+        <legend>Músculos del día</legend>
+        <!-- Checkboxes generados desde JS: se pueden marcar varios -->
+        <div class="opciones-musculo" id="empezar-musculos"></div>
+      </fieldset>
+
+      <label class="campo">Fecha
+        <input type="date" name="fecha">
+      </label>
+
+      <p class="error-form" id="error-empezar" role="alert" hidden></p>
+
+      <button type="submit" class="boton-principal" id="btn-confirmar-sesion">Empezar</button>
+      <button type="button" class="boton-secundario" data-cerrar>Cancelar</button>
+    </form>
+  </dialog>
+
+
+  <!-- ======================================================
+       HOJA: ELEGIR EJERCICIO
+       ====================================================== -->
+  <dialog class="hoja hoja--alta" id="dialogo-elegir" aria-labelledby="titulo-elegir">
+    <div class="hoja__panel">
+      <div class="hoja__fila">
+        <p class="hoja__titulo" id="titulo-elegir">Agregar ejercicio</p>
+        <button type="button" class="boton-icono" data-cerrar aria-label="Cerrar">✕</button>
+      </div>
+      <input type="search" class="buscador" id="elegir-buscar" placeholder="Buscar ejercicio…"
+             aria-label="Buscar ejercicio" autocomplete="off">
+      <nav class="filtros" id="elegir-filtros" aria-label="Filtrar por músculo"></nav>
+      <div class="hoja__scroll" id="elegir-lista"></div>
+    </div>
+  </dialog>
+
+
+  <!-- ======================================================
+       HOJA: CARGAR SERIES DE UN EJERCICIO
+       ====================================================== -->
+  <dialog class="hoja hoja--alta" id="dialogo-series" aria-labelledby="series-nombre">
+    <div class="hoja__panel">
+      <div class="hoja__fila">
+        <div>
+          <p class="hoja__titulo hoja__titulo--izq" id="series-nombre"></p>
+          <p class="ayuda" id="series-musculo"></p>
+        </div>
+        <button type="button" class="boton-icono" data-cerrar aria-label="Cerrar">✕</button>
+      </div>
+
+      <div class="hoja__scroll">
+        <!-- La última vez (lo completa JS; se oculta si nunca lo hiciste) -->
+        <div class="ultima-vez" id="series-ultima" hidden>
+          <p class="ultima-vez__titulo" id="series-ultima-fecha"></p>
+          <p class="ultima-vez__detalle" id="series-ultima-detalle"></p>
+          <button type="button" class="boton-texto boton-texto--dorado" id="btn-repetir">Repetir lo de la última vez</button>
+        </div>
+
+        <!-- Filas de series o campo de minutos (lo arma JS según el tipo) -->
+        <div id="series-editor"></div>
+
+        <p class="error-form" id="error-series" role="alert" hidden></p>
+      </div>
+
+      <button type="button" class="boton-principal" id="btn-guardar-series">Guardar ejercicio</button>
+      <button type="button" class="boton-peligro" id="btn-quitar-ejercicio">Quitar de la sesión</button>
+    </div>
+  </dialog>
+
+
+  <!-- ======================================================
+       PESTAÑA 2: HISTORIAL
+       ====================================================== -->
+  <section id="pantalla-historial" class="pantalla">
+    <header class="encabezado">
+      <div class="encabezado__fila">
+        <p class="encabezado__fecha" id="cantidad-sesiones">Tus sesiones</p>
+        <button class="boton-icono" data-ir="ajustes" aria-label="Ajustes">⚙</button>
+      </div>
+      <h1>Historial</h1>
+    </header>
+
+    <button class="boton-secundario boton--ancho" id="btn-sesion-pasada">+ Cargar sesión de otro día</button>
+
+    <!-- Sesiones agrupadas por mes (lo arma pantalla-historial.js) -->
+    <div id="lista-historial"></div>
+  </section>
+
+
+  <!-- ======================================================
+       DETALLE DE UNA SESIÓN (se abre desde el Historial)
+       ====================================================== -->
+  <section id="pantalla-sesion" class="pantalla">
+    <header class="barra-superior">
+      <!-- Sin data-volver: este botón tiene su propio comportamiento (ver pantalla-historial.js) -->
+      <button class="boton-icono" id="btn-volver-historial" aria-label="Volver al historial">←</button>
+      <h2 id="detalle-titulo"></h2>
+    </header>
+
+    <p class="sesion__musculos" id="detalle-musculos"></p>
+    <p class="ayuda" id="detalle-resumen"></p>
+
+    <label class="campo campo--fila">Fecha
+      <input type="date" id="detalle-fecha">
+    </label>
+
+    <div id="detalle-ejercicios"></div>
+
+    <div class="sesion__acciones">
+      <button class="boton-principal" id="btn-detalle-agregar">+ Agregar ejercicio</button>
+      <button class="boton-peligro" id="btn-detalle-borrar">Borrar sesión</button>
+    </div>
+  </section>
+
+
+  <!-- ======================================================
+       PESTAÑA 3: PROGRESO
+       ====================================================== -->
+  <section id="pantalla-progreso" class="pantalla">
+    <header class="encabezado">
+      <div class="encabezado__fila">
+        <p class="encabezado__fecha">Cómo venís</p>
+        <button class="boton-icono" data-ir="ajustes" aria-label="Ajustes">⚙</button>
+      </div>
+      <h1>Progreso</h1>
+    </header>
+
+    <!-- Selector de las tres vistas -->
+    <div class="pestanas" role="tablist" id="progreso-pestanas">
+      <button role="tab" data-vista="ejercicio" aria-selected="true">Ejercicio</button>
+      <button role="tab" data-vista="asistencia" aria-selected="false">Asistencia</button>
+      <button role="tab" data-vista="musculos" aria-selected="false">Músculos</button>
+    </div>
+
+    <!-- Si todavía no hay sesiones terminadas -->
+    <p class="vacio" id="progreso-vacio" hidden>
+      Cuando termines tus primeros entrenamientos,<br>acá vas a ver cómo progresás.
+    </p>
+
+    <!-- VISTA 1: EJERCICIO -->
+    <div class="vista" id="vista-ejercicio">
+      <label class="selector-ejercicio">
+        <span class="visualmente-oculto">Ejercicio</span>
+        <!-- Las opciones las arma JS, agrupadas por músculo con <optgroup> -->
+        <select id="progreso-ejercicio"></select>
+      </label>
+      <div class="cifras" id="progreso-cifras"></div>
+      <div class="tarjeta">
+        <p class="tarjeta__titulo" id="progreso-titulo-grafico"></p>
+        <div id="progreso-grafico"></div>
+      </div>
+      <ul class="lista" id="progreso-veces"></ul>
+    </div>
+
+    <!-- VISTA 2: ASISTENCIA -->
+    <div class="vista" id="vista-asistencia" hidden>
+      <div class="cifras cifras--tres" id="asistencia-cifras"></div>
+
+      <div class="tarjeta">
+        <div class="calendario__cabecera">
+          <button class="boton-icono" id="mes-anterior" aria-label="Mes anterior">‹</button>
+          <p class="calendario__titulo" id="mes-titulo"></p>
+          <button class="boton-icono" id="mes-siguiente" aria-label="Mes siguiente">›</button>
+        </div>
+        <div class="calendario__semana" aria-hidden="true">
+          <span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span>
+        </div>
+        <div class="calendario__grilla" id="calendario"></div>
+        <p class="ayuda">Tocá un día marcado para ver esa sesión.</p>
+      </div>
+
+      <div class="tarjeta">
+        <p class="tarjeta__titulo">Sesiones por semana</p>
+        <div id="asistencia-grafico"></div>
+      </div>
+    </div>
+
+    <!-- VISTA 3: MÚSCULOS -->
+    <div class="vista" id="vista-musculos" hidden>
+      <nav class="filtros" id="musculos-periodos" aria-label="Período"></nav>
+      <ul class="barras-musculo" id="musculos-lista"></ul>
+    </div>
+  </section>
+
+
+  <!-- ======================================================
+       PESTAÑA 4: EJERCICIOS
+       ====================================================== -->
+  <section id="pantalla-ejercicios" class="pantalla">
+    <header class="encabezado">
+      <div class="encabezado__fila">
+        <p class="encabezado__fecha" id="cantidad-ejercicios">Tu catálogo</p>
+        <button class="boton-icono" data-ir="ajustes" aria-label="Ajustes">⚙</button>
+      </div>
+      <h1>Ejercicios</h1>
+    </header>
+
+    <input type="search" class="buscador" id="buscar-ejercicio"
+           placeholder="Buscar ejercicio…" aria-label="Buscar ejercicio" autocomplete="off">
+
+    <!-- Los chips de músculos se generan desde pantalla-ejercicios.js -->
+    <nav class="filtros" id="filtros-musculo" aria-label="Filtrar por músculo"></nav>
+
+    <!-- La lista también se genera desde JavaScript -->
+    <div id="lista-ejercicios"></div>
+
+    <button class="boton-flotante" id="btn-nuevo-ejercicio" aria-label="Nuevo ejercicio">+</button>
+  </section>
+
+
+  <!-- ======================================================
+       FORMULARIO DE EJERCICIO (hoja que sube desde abajo)
+       <dialog> es un elemento de HTML para ventanas: con showModal()
+       aparece encima de todo, con el fondo oscurecido.
+       ====================================================== -->
+  <dialog class="hoja" id="dialogo-ejercicio" aria-labelledby="titulo-form-ejercicio">
+    <form class="hoja__panel" id="form-ejercicio" novalidate>
+      <p class="hoja__titulo" id="titulo-form-ejercicio">Nuevo ejercicio</p>
+
+      <label class="campo">Nombre
+        <input type="text" name="nombre" maxlength="40" autocomplete="off" placeholder="Ej: Curl con barra">
+      </label>
+
+      <fieldset class="campo">
+        <legend>Músculo</legend>
+        <!-- Radios generados desde JS (uno por músculo) -->
+        <div class="opciones-musculo" id="opciones-musculo"></div>
+      </fieldset>
+
+      <fieldset class="campo">
+        <legend>Tipo</legend>
+        <div class="segmentado" id="opciones-tipo"></div>
+        <p class="ayuda" id="ayuda-tipo"></p>
+      </fieldset>
+
+      <p class="ayuda" id="aviso-uso" hidden></p>
+      <p class="error-form" id="error-ejercicio" role="alert" hidden></p>
+
+      <button type="submit" class="boton-principal">Guardar</button>
+      <button type="button" class="boton-peligro" id="btn-eliminar-ejercicio">Eliminar ejercicio</button>
+      <button type="button" class="boton-secundario" id="btn-cancelar-ejercicio">Cancelar</button>
+    </form>
+  </dialog>
+
+
+  <!-- ======================================================
+       AJUSTES (se abre con el botón ⚙ de cualquier pestaña)
+       ====================================================== -->
+  <section id="pantalla-ajustes" class="pantalla">
+    <header class="barra-superior">
+      <button class="boton-icono" data-volver aria-label="Volver">←</button>
+      <h2>Ajustes</h2>
+    </header>
+
+    <div class="tarjeta">
+      <p class="tarjeta__titulo">Tus datos</p>
+      <!-- Lo completa app.js -->
+      <ul class="resumen-datos" id="resumen-datos"></ul>
+      <p class="ayuda" id="ultimo-respaldo"></p>
+    </div>
+
+    <div class="tarjeta">
+      <p class="tarjeta__titulo">Respaldo</p>
+      <p class="ayuda">Los datos viven solo en este celular. Exportá un respaldo de vez en cuando
+        y guardalo en Drive o mandatelo por mail.</p>
+      <button class="boton-principal" id="btn-exportar">Exportar respaldo (JSON)</button>
+      <!-- El input de archivo queda oculto: lo abre el botón -->
+      <button class="boton-secundario" id="btn-importar">Importar respaldo</button>
+      <input type="file" id="input-importar" accept=".json,application/json" hidden>
+    </div>
+
+    <div class="tarjeta">
+      <p class="tarjeta__titulo">Ejercicios sugeridos</p>
+      <p class="ayuda">Vuelve a agregar los ejercicios de ejemplo que hayas borrado. No toca los tuyos.</p>
+      <button class="boton-secundario" id="btn-sugeridos">Agregar sugeridos que falten</button>
+    </div>
+
+    <div class="tarjeta">
+      <p class="tarjeta__titulo">Planilla</p>
+      <p class="ayuda">Tus entrenamientos terminados en un archivo para Google Sheets o Excel:
+        una fila por serie (fecha, músculo, ejercicio, serie, reps, kg y minutos).</p>
+      <button class="boton-secundario" id="btn-csv">Exportar a CSV</button>
+    </div>
+  </section>
+
+
+  <!-- ======================================================
+       MENÚ INFERIOR (fijo, siempre visible)
+       data-ir dice a qué pantalla lleva cada botón
+       ====================================================== -->
+  <nav class="menu-inferior" aria-label="Menú principal">
+    <button class="menu-inferior__boton activo" data-ir="entrenar" aria-current="page">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/></svg>
+      <span>Entrenar</span>
+    </button>
+    <button class="menu-inferior__boton" data-ir="historial">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>
+      <span>Historial</span>
+    </button>
+    <button class="menu-inferior__boton" data-ir="progreso">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16M6 15l4-4 3 3 5-6"/></svg>
+      <span>Progreso</span>
+    </button>
+    <button class="menu-inferior__boton" data-ir="ejercicios">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>
+      <span>Ejercicios</span>
+    </button>
+  </nav>
+
+  <!-- Mensajito flotante para avisos -->
+  <div class="aviso" id="aviso" role="status"></div>
+
+  <!-- type="module": el navegador trata app.js como módulo y permite usar import/export -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
